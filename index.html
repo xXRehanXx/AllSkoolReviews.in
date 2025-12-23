@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllSkoolReviews</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: #4CAF50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    h2 {
+        color: #333;
+    }
+
+    .box {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, textarea, select, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #45a049;
+    }
+
+    details {
+        background: #f9f9f9;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+
+    summary {
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .rating-text {
+        color: #555;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>AllSkoolReviews</h1>
+    <p>Search schools. Read honest reviews.</p>
+</header>
+
+<div class="container">
+
+    <!-- ADD REVIEW -->
+    <div class="box">
+        <h2>Add a Review</h2>
+
+        <input type="text" id="school" placeholder="School Name">
+        <input type="text" id="city" placeholder="City">
+        <select id="board">
+            <option value="">Select Board</option>
+            <option>CBSE</option>
+            <option>ICSE</option>
+            <option>State Board</option>
+            <option>IB</option>
+            <option>Other</option>
+        </select>
+
+        <select id="rating">
+            <option value="">Rating</option>
+            <option value="1">1 / 5</option>
+            <option value="2">2 / 5</option>
+            <option value="3">3 / 5</option>
+            <option value="4">4 / 5</option>
+            <option value="5">5 / 5</option>
+        </select>
+
+        <textarea id="reviewText" rows="4" placeholder="Write your review"></textarea>
+
+        <button onclick="addReview()">Submit Review</button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="box">
+        <h2>Search Reviews</h2>
+        <input type="text" id="searchInput" placeholder="Search by school, city, or board">
+        <button onclick="searchReviews()">Search</button>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="box">
+        <h2>All Reviews</h2>
+        <div id="reviewsContainer"></div>
+    </div>
+
+</div>
+
+<script>
+    let reviews = JSON.parse(localStorage.getItem("allSkoolReviews")) || [];
+
+    const reviewsContainer = document.getElementById("reviewsContainer");
+
+    function renderReviews(list) {
+        reviewsContainer.innerHTML = "";
+
+        if (list.length === 0) {
+            reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
+            return;
+        }
+
+        list.forEach(r => {
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+
+            summary.textContent = `${r.school} (${r.board}, ${r.city})`;
+
+            const rating = document.createElement("div");
+            rating.className = "rating-text";
+            rating.textContent = `Rating: ${r.rating} / 5`;
+
+            const text = document.createElement("p");
+            text.textContent = r.text;
+
+            details.appendChild(summary);
+            details.appendChild(rating);
+            details.appendChild(text);
+
+            reviewsContainer.appendChild(details);
+        });
+    }
+
+    function addReview() {
+        const school = document.getElementById("school").value.trim();
+        const city = document.getElementById("city").value.trim();
+        const board = document.getElementById("board").value;
+        const rating = document.getElementById("rating").value;
+        const text = document.getElementById("reviewText").value.trim();
+
+        if (!school || !city || !board || !rating || !text) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        reviews.unshift({ school, city, board, rating, text });
+        localStorage.setItem("allSkoolReviews", JSON.stringify(reviews));
+
+        document.getElementById("school").value = "";
+        document.getElementById("city").value = "";
+        document.getElementById("board").value = "";
+        document.getElementById("rating").value = "";
+        document.getElementById("reviewText").value = "";
+
+        renderReviews(reviews);
+    }
+
+    function searchReviews() {
+        const q = document.getElementById("searchInput").value.toLowerCase();
+
+        const filtered = reviews.filter(r =>
+            r.school.toLowerCase().includes(q) ||
+            r.city.toLowerCase().includes(q) ||
+            r.board.toLowerCase().includes(q)
+        );
+
+        renderReviews(filtered);
+    }
+
+    renderReviews(reviews);
+</script>
+
+</body>
+</html>
